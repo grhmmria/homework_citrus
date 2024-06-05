@@ -3,6 +3,7 @@ package autotest;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import com.consol.citrus.context.TestContext;
 import com.consol.citrus.testng.spring.TestNGCitrusSpringSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,34 +13,23 @@ import org.testng.annotations.Test;
 import static com.consol.citrus.dsl.MessageSupport.MessageBodySupport.fromBody;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 
-public class DuckQuack extends TestNGCitrusSpringSupport {
+public class DuckUpdateColorHeightTest extends TestNGCitrusSpringSupport {
 
-    @Test(description = "Кряканье с существующим нечётным идентификатором")
+    @Test(description = "Обновление цвета и высоты уточки")
     @CitrusTest
-    public void oddQuack(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 5.0, "rubber", "quack", "ACTIVE");
+    public void updateColorAndHeight(@Optional @CitrusResource TestCaseRunner runner, @Optional @CitrusResource TestContext context) {
+        String material = "rubber";
+        String sound = "quack";
+        String wingsState = "ACTIVE";
+        createDuck(runner, "yellow", 5.0, material, sound, wingsState);
         runner.$(http().client("http://localhost:2222")
                 .receive()
                 .response()
                 .message()
                 .extract(fromBody().expression("$.id", "duckId"))
         );
-        duckQuack(runner, "${duckId}");
-        validateResponse(runner, "{\n" + "\"sound\":\"quack-quack, quack-quack, quack-quack, quack-quack, quack-quack\"\n" + "}");
-    }
-
-    @Test(description = "Кряканье с существующим чётным идентификатором")
-    @CitrusTest
-    public void evenQuack(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 5.0, "rubber", "quack", "ACTIVE");
-        runner.$(http().client("http://localhost:2222")
-                .receive()
-                .response()
-                .message()
-                .extract(fromBody().expression("$.id", "duckId"))
-        );
-        duckQuack(runner, "${duckId}");
-        validateResponse(runner, "{\n" + "\"sound\":\"moo-moo, moo-moo, moo-moo, moo-moo, moo-moo\"\n" + "}");
+        duckUpdate(runner, "white", 8.0, Integer.parseInt(context.getVariable("duckId")), material, sound, wingsState);
+        validateResponse(runner, "{ \"message\": \"Duck with id = " + "${duckId}" + " is updated\" }");
     }
 
     public void createDuck(TestCaseRunner runner, String color, double height, String material, String sound, String wingsState) {
@@ -47,7 +37,7 @@ public class DuckQuack extends TestNGCitrusSpringSupport {
                 .send()
                 .post("api/duck/create")
                 .message()
-                .contentType(MediaType.APPLICATION_JSON_VALUE) // !!!!!!!!
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body("{" +
                         "\"color\": \"" + color +
                         "\",\n \"height\": \"" + height +
@@ -57,13 +47,17 @@ public class DuckQuack extends TestNGCitrusSpringSupport {
                         "\" \n }"));
     }
 
-    public void duckQuack(TestCaseRunner runner, String id) { //крякать
+    public void duckUpdate(TestCaseRunner runner, String color, double height, int id, String material, String sound, String wingsState) {
         runner.$(http().client("http://localhost:2222")
                 .send()
-                .get("api/duck/action/quack")
-                .queryParam("id", id)
-                .queryParam("repetitionCount", "2")
-                .queryParam("soundCount", "5"));
+                .put("api/duck/update")
+                .queryParam("color", color)
+                .queryParam("height", Double.toString(height))
+                .queryParam("id", Integer.toString(id))
+                .queryParam("material", material)
+                .queryParam("sound", sound)
+                .queryParam("wingsState", wingsState));
+
     }
 
     public void validateResponse(TestCaseRunner runner, String responseMessage) {

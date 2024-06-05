@@ -3,6 +3,7 @@ package autotest;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import com.consol.citrus.context.TestContext;
 import com.consol.citrus.testng.spring.TestNGCitrusSpringSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -12,54 +13,31 @@ import org.testng.annotations.Test;
 import static com.consol.citrus.dsl.MessageSupport.MessageBodySupport.fromBody;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 
-public class DuckFly extends TestNGCitrusSpringSupport {
-    @Test(description = "–ü–æ–ª—ë—Ç, ACTIVE –∫—Ä—ã–ª—å—è")
+public class DuckUpdateColorSoundTest extends TestNGCitrusSpringSupport {
+
+    @Test(description = "Œ·ÌÓ‚ÎÂÌËÂ ˆ‚ÂÚ‡ Ë ‚˚ÒÓÚ˚ ÛÚÓ˜ÍË")
     @CitrusTest
-    public void flyActive(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 5.0, "rubber", "quack", "ACTIVE");
+    public void updateColorAndSound(@Optional @CitrusResource TestCaseRunner runner, @Optional @CitrusResource TestContext context) {
+        double height = 5.0;
+        String material = "rubber";
+        String wingsState = "ACTIVE";
+        createDuck(runner, "yellow", height, material, "quack", wingsState);
         runner.$(http().client("http://localhost:2222")
                 .receive()
                 .response()
                 .message()
                 .extract(fromBody().expression("$.id", "duckId"))
         );
-        duckFly(runner, "${duckId}");
-        validateResponse(runner, "{\n" + "\"message\":\"I am flying :)\"\n" + "}");
+        duckUpdate(runner, "white", height, Integer.parseInt(context.getVariable("duckId")), material, "quack!!!!!",wingsState);
+        validateResponse(runner, "{ \"message\": \"Duck with id = " + "${duckId}" + " is updated\" }");
     }
 
-    @Test(description = "–ü–æ–ª—ë—Ç, FIXED –∫—Ä—ã–ª—å—è")
-    @CitrusTest
-    public void flyFixed(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 8.0, "rubber", "quack", "FIXED");
-        runner.$(http().client("http://localhost:2222")
-                .receive()
-                .response()
-                .message()
-                .extract(fromBody().expression("$.id", "duckId"))
-        );
-        duckFly(runner, "${duckId}");
-        validateResponse(runner, "{\n" + "\"message\":\"I can not fly :C\"\n" + "}");
-    }
-
-    @Test(description = "–ü–æ–ª—ë—Ç, UNDEFINED –∫—Ä—ã–ª—å—è")
-    @CitrusTest
-    public void flyUndefined(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 11.0, "rubber", "quack", "UNDEFINED");
-        runner.$(http().client("http://localhost:2222")
-                .receive()
-                .response()
-                .message()
-                .extract(fromBody().expression("$.id", "duckId"))
-        );
-        duckFly(runner, "${duckId}");
-        validateResponse(runner, "{\n" + "\"message\":\"Wings are not detected :(\"\n" + "}");
-    }
     public void createDuck(TestCaseRunner runner, String color, double height, String material, String sound, String wingsState) {
         runner.$(http().client("http://localhost:2222")
                 .send()
                 .post("api/duck/create")
                 .message()
-                .contentType(MediaType.APPLICATION_JSON_VALUE) // !!!!!!!!
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body("{" +
                         "\"color\": \"" + color +
                         "\",\n \"height\": \"" + height +
@@ -69,11 +47,17 @@ public class DuckFly extends TestNGCitrusSpringSupport {
                         "\" \n }"));
     }
 
-    public void duckFly(TestCaseRunner runner, String id) { //–ª–µ—Ç–µ—Ç—å
+    public void duckUpdate(TestCaseRunner runner, String color, double height, int id, String material, String sound, String wingsState) {
         runner.$(http().client("http://localhost:2222")
                 .send()
-                .get("api/duck/action/fly")
-                .queryParam("id", id));
+                .put("api/duck/update")
+                .queryParam("color", color)
+                .queryParam("height", Double.toString(height))
+                .queryParam("id", Integer.toString(id))
+                .queryParam("material", material)
+                .queryParam("sound", sound)
+                .queryParam("wingsState", wingsState));
+
     }
 
     public void validateResponse(TestCaseRunner runner, String responseMessage) {

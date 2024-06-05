@@ -12,11 +12,10 @@ import org.testng.annotations.Test;
 import static com.consol.citrus.dsl.MessageSupport.MessageBodySupport.fromBody;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 
-public class DuckUpdate_2 extends TestNGCitrusSpringSupport {
-
-    @Test(description = "Кряканье с существующим нечётным идентификатором")
+public class DuckFlyTest extends TestNGCitrusSpringSupport {
+    @Test(description = "Полёт, ACTIVE крылья")
     @CitrusTest
-    public void update(@Optional @CitrusResource TestCaseRunner runner) {
+    public void flyActive(@Optional @CitrusResource TestCaseRunner runner) {
         createDuck(runner, "yellow", 5.0, "rubber", "quack", "ACTIVE");
         runner.$(http().client("http://localhost:2222")
                 .receive()
@@ -24,16 +23,43 @@ public class DuckUpdate_2 extends TestNGCitrusSpringSupport {
                 .message()
                 .extract(fromBody().expression("$.id", "duckId"))
         );
-        duckUpdate(runner, "${duckId}", "white", "11.0");
-        validateResponse(runner, "{\n" + "\"sound\":\\n" + "}");
+        duckFly(runner, "${duckId}");
+        validateResponse(runner, "{ \"message\": \"string\" }");
     }
 
+    @Test(description = "Полёт, FIXED крылья")
+    @CitrusTest
+    public void flyFixed(@Optional @CitrusResource TestCaseRunner runner) {
+        createDuck(runner, "yellow", 8.0, "rubber", "quack", "FIXED");
+        runner.$(http().client("http://localhost:2222")
+                .receive()
+                .response()
+                .message()
+                .extract(fromBody().expression("$.id", "duckId"))
+        );
+        duckFly(runner, "${duckId}");
+        validateResponse(runner, "{ \"message\": \"string\" }");
+    }
+
+    @Test(description = "Полёт, UNDEFINED крылья")
+    @CitrusTest
+    public void flyUndefined(@Optional @CitrusResource TestCaseRunner runner) {
+        createDuck(runner, "yellow", 11.0, "rubber", "quack", "UNDEFINED");
+        runner.$(http().client("http://localhost:2222")
+                .receive()
+                .response()
+                .message()
+                .extract(fromBody().expression("$.id", "duckId"))
+        );
+        duckFly(runner, "${duckId}");
+        validateResponse(runner, "{\n" + "\"message\":\"Wings are not detected :(\"\n" + "}");
+    }
     public void createDuck(TestCaseRunner runner, String color, double height, String material, String sound, String wingsState) {
         runner.$(http().client("http://localhost:2222")
                 .send()
                 .post("api/duck/create")
                 .message()
-                .contentType(MediaType.APPLICATION_JSON_VALUE) // !!!!!!!!
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body("{" +
                         "\"color\": \"" + color +
                         "\",\n \"height\": \"" + height +
@@ -43,18 +69,11 @@ public class DuckUpdate_2 extends TestNGCitrusSpringSupport {
                         "\" \n }"));
     }
 
-
-    public void duckUpdate (TestCaseRunner runner, String id, String color, String sound) {
+    public void duckFly(TestCaseRunner runner, String id) { //лететь
         runner.$(http().client("http://localhost:2222")
-                .send ()
-                .put("api/duck/update")
-                .message()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .queryParam("id", id)
-                .body("{" +
-                        "\"color\": \"" + color +
-                        "\",\n \"sound\": \"" + sound +
-                        "\" \n }"));
+                .send()
+                .get("api/duck/action/fly")
+                .queryParam("id", id));
     }
 
     public void validateResponse(TestCaseRunner runner, String responseMessage) {
