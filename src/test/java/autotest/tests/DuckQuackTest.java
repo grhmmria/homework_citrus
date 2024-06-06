@@ -1,4 +1,4 @@
-package autotest;
+package autotest.tests;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
@@ -18,7 +18,12 @@ public class DuckQuackTest extends TestNGCitrusSpringSupport {
     @Test(description = "Кряканье с существующим нечётным идентификатором")
     @CitrusTest
     public void oddQuack(@Optional @CitrusResource TestCaseRunner runner,@Optional @CitrusResource TestContext context) {
-        createDuck(runner, "yellow", 5.0, "rubber", "quack", "ACTIVE");
+        String color = "yellow";
+        double height = 5.0;
+        String material = "rubber";
+        String sound = "quack";
+        String wingsState = "ACTIVE";
+        createDuck(runner, color, height, material, sound, wingsState);
         runner.$(http().client("http://localhost:2222")
                 .receive()
                 .response()
@@ -30,7 +35,7 @@ public class DuckQuackTest extends TestNGCitrusSpringSupport {
             duckQuack(runner, "${duck1}");
         }
         else {
-            createDuck(runner, "yellow", 8.0, "wood", "quack", "ACTIVE");
+            createDuck(runner, color, height, material, sound, wingsState);
             runner.$(http().client("http://localhost:2222")
                     .receive()
                     .response()
@@ -39,13 +44,18 @@ public class DuckQuackTest extends TestNGCitrusSpringSupport {
             );
             duckQuack(runner, "${duck2}");
         }
-        validateResponse(runner, "{}");
+        validateResponse(runner, "{\n" + "\"sound\":\"quack-quack, quack-quack, quack-quack, quack-quack, quack-quack\"\n" + "}");
     }
 
     @Test(description = "Кряканье с существующим чётным идентификатором")
     @CitrusTest
     public void evenQuack(@Optional @CitrusResource TestCaseRunner runner,@Optional @CitrusResource TestContext context) {
-        createDuck(runner, "yellow", 5.0, "rubber", "quack", "ACTIVE");
+        String color = "yellow";
+        double height = 5.0;
+        String material = "rubber";
+        String sound = "quack";
+        String wingsState = "ACTIVE";
+        createDuck(runner, color, height, material, sound, wingsState);
         runner.$(http().client("http://localhost:2222")
                 .receive()
                 .response()
@@ -57,7 +67,7 @@ public class DuckQuackTest extends TestNGCitrusSpringSupport {
             duckQuack(runner, "${duck1}");
         }
         else {
-            createDuck(runner, "yellow", 8.0, "wood", "quack", "ACTIVE");
+            createDuck(runner, color, height, material, sound, wingsState);
             runner.$(http().client("http://localhost:2222")
                     .receive()
                     .response()
@@ -66,7 +76,7 @@ public class DuckQuackTest extends TestNGCitrusSpringSupport {
             );
             duckQuack(runner, "${duck2}");
         }
-        validateResponse(runner, "{}");
+        validateResponse(runner, "{\n" + "\"sound\":\"quack-quack, quack-quack, quack-quack, quack-quack, quack-quack\"\n" + "}");
     }
 
     public void createDuck(TestCaseRunner runner, String color, double height, String material, String sound, String wingsState) {

@@ -1,9 +1,8 @@
-package autotest;
+package autotest.tests;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
-import com.consol.citrus.context.TestContext;
 import com.consol.citrus.testng.spring.TestNGCitrusSpringSupport;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,23 +12,26 @@ import org.testng.annotations.Test;
 import static com.consol.citrus.dsl.MessageSupport.MessageBodySupport.fromBody;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 
-public class DuckUpdateColorHeightTest extends TestNGCitrusSpringSupport {
+public class DuckDeleteTest extends TestNGCitrusSpringSupport {
 
-    @Test(description = "Обновление цвета и высоты уточки")
+
+    @Test(description = "Удаление утки")
     @CitrusTest
-    public void updateColorAndHeight(@Optional @CitrusResource TestCaseRunner runner, @Optional @CitrusResource TestContext context) {
+    public void deleteExisting(@Optional @CitrusResource TestCaseRunner runner) {
+        String color = "yellow";
+        double height = 8.0;
         String material = "rubber";
         String sound = "quack";
         String wingsState = "ACTIVE";
-        createDuck(runner, "yellow", 5.0, material, sound, wingsState);
+        createDuck(runner, color, height, material, sound, wingsState);
         runner.$(http().client("http://localhost:2222")
                 .receive()
                 .response()
                 .message()
                 .extract(fromBody().expression("$.id", "duckId"))
         );
-        duckUpdate(runner, "white", 8.0, Integer.parseInt(context.getVariable("duckId")), material, sound, wingsState);
-        validateResponse(runner, "{ \"message\": \"Duck with id = " + "${duckId}" + " is updated\" }");
+        deleteDuck(runner, "${duckId}");
+        validateResponse(runner, "{\n" + "\"message\":\"Duck is deleted\"\n" + "}");
     }
 
     public void createDuck(TestCaseRunner runner, String color, double height, String material, String sound, String wingsState) {
@@ -47,17 +49,12 @@ public class DuckUpdateColorHeightTest extends TestNGCitrusSpringSupport {
                         "\" \n }"));
     }
 
-    public void duckUpdate(TestCaseRunner runner, String color, double height, int id, String material, String sound, String wingsState) {
+    public void deleteDuck(TestCaseRunner runner, String id) {
         runner.$(http().client("http://localhost:2222")
                 .send()
-                .put("api/duck/update")
-                .queryParam("color", color)
-                .queryParam("height", Double.toString(height))
-                .queryParam("id", Integer.toString(id))
-                .queryParam("material", material)
-                .queryParam("sound", sound)
-                .queryParam("wingsState", wingsState));
-
+                .delete("api/duck/delete")
+                .message()
+                .queryParam("id", id));
     }
 
     public void validateResponse(TestCaseRunner runner, String responseMessage) {

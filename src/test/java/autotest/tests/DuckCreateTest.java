@@ -1,4 +1,4 @@
-package autotest;
+package autotest.tests;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;

@@ -1,4 +1,4 @@
-package autotest;
+package autotest.tests;
 
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
@@ -17,7 +17,12 @@ public class DuckSwimTest extends TestNGCitrusSpringSupport {
     @Test(description = "Плавание, существующий id")
     @CitrusTest
     public void successfulSwim(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 8.0, "rubber", "quack", "ACTIVE");
+        String color = "yellow";
+        double height = 8.0;
+        String material = "rubber";
+        String sound = "quack";
+        String wingsState = "ACTIVE";
+        createDuck(runner, color, height, material, sound, wingsState);
         runner.$(http().client("http://localhost:2222")
                 .receive()
                 .response()
@@ -25,13 +30,19 @@ public class DuckSwimTest extends TestNGCitrusSpringSupport {
                 .extract(fromBody().expression("$.id", "duckId"))
         );
         duckSwim(runner, "${duckId}");
-        validateOK(runner, "{ \"message\": \"string\" }");
+        validateOK(runner, "{" + "\"message\": \"I’m swimming\"}");
     }
 
+    // так как случая для несуществующего айди не прописано в документации оставила фактический
     @Test(description = "Плавание, несуществующий id")
     @CitrusTest
     public void unsuccessfulSwim(@Optional @CitrusResource TestCaseRunner runner) {
-        createDuck(runner, "yellow", 8.0, "rubber", "quack", "ACTIVE");
+        String color = "yellow";
+        double height = 8.0;
+        String material = "rubber";
+        String sound = "quack";
+        String wingsState = "ACTIVE";
+        createDuck(runner, color, height, material, sound, wingsState);
         runner.$(http().client("http://localhost:2222")
                 .receive()
                 .response()
@@ -40,7 +51,7 @@ public class DuckSwimTest extends TestNGCitrusSpringSupport {
         );
         deleteDuck(runner, "${duckId}");
         duckSwim(runner, "${duckId}");
-        validateNF(runner, "{ \"message\": \"string\" }");
+        validateNF(runner, "{" + "\"message\": \"Paws are not found ((((\" }");
     }
 
     public void createDuck(TestCaseRunner runner, String color, double height, String material, String sound, String wingsState) {
