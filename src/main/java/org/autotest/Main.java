@@ -1,2 +1,4 @@
 package org.autotest;
-public class Main {}
+public class Main {
+
+}

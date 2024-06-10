@@ -14,4 +14,5 @@ public class DuckMessage {
     @JsonProperty
     private String message;
 
+
 }
