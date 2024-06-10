@@ -1,13 +1,13 @@
 plugins {
     id 'java'
     id 'io.qameta.allure' version '2.9.6'
-
-    id 'application'
-
 }
 
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
 tasks.withType(JavaCompile) {
-    options.encoding = 'Windows-2151'
+    options.encoding = 'UTF-8'
 }
 
 repositories {
