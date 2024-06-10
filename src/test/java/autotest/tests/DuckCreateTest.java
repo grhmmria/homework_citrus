@@ -1,11 +1,15 @@
 package autotest.tests;
 
 import autotest.clients.DuckActionClient;
+import autotest.payloads.DuckCreate;
+import autotest.payloads.WingsState;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
+
+import static autotest.payloads.WingsState.ACTIVE;
 
 // здесь оставила инициализацию через строки так как вызывается ещё валидатор
 public class DuckCreateTest extends DuckActionClient {
@@ -17,10 +21,12 @@ public class DuckCreateTest extends DuckActionClient {
         double height = 8.0;
         String material = "rubber";
         String sound = "quack";
-        String wingsState = "ACTIVE";
-        createDuck(runner, color, height, material, sound, wingsState);
+        WingsState wingsState = ACTIVE;
+        DuckCreate duckling = new DuckCreate().color(color).height(height).material(material).sound(sound).wingsState(wingsState);
+        createDuck(runner, duckling);
         validateCreate(runner, color, height, material, sound, wingsState);
     }
+
 
     @Test(description = "Создание утки, wood")
     @CitrusTest
@@ -29,8 +35,9 @@ public class DuckCreateTest extends DuckActionClient {
         double height = 5.0;
         String material = "wood";
         String sound = "quack";
-        String wingsState = "ACTIVE";
-        createDuck(runner, color, height, material, sound, wingsState);
+        WingsState wingsState = ACTIVE;
+        DuckCreate duckling = new DuckCreate().color(color).height(height).material(material).sound(sound).wingsState(wingsState);
+        createDuck(runner, duckling);
         validateCreate(runner, color, height, material, sound, wingsState);
     }
 

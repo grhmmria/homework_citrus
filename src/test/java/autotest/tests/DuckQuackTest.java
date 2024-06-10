@@ -1,6 +1,9 @@
 package autotest.tests;
 
 import autotest.clients.DuckActionClient;
+import autotest.payloads.DuckCreate;
+import autotest.payloads.DuckSound;
+import autotest.payloads.WingsState;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
@@ -9,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
+import static autotest.payloads.WingsState.ACTIVE;
 import static com.consol.citrus.dsl.MessageSupport.MessageBodySupport.fromBody;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 
@@ -21,11 +25,12 @@ public class DuckQuackTest extends DuckActionClient {
         double height = 5.0;
         String material = "rubber";
         String sound = "quack";
-        String wingsState = "ACTIVE";
+        WingsState wingsState = ACTIVE;
         String repetitionCount = "2";
         String soundCount = "5";
 
-        createDuck(runner, color, height, material, sound, wingsState);
+        DuckCreate duckling = new DuckCreate().color(color).height(height).material(material).sound(sound).wingsState(wingsState);
+        createDuck(runner, duckling);
 
         runner.$(http().client(yellowDuckService)
                 .receive()
@@ -33,20 +38,10 @@ public class DuckQuackTest extends DuckActionClient {
                 .message()
                 .extract(fromBody().expression("$.id", "duck1"))
         );
-        int intID = Integer.parseInt(context.getVariable("duck1"));
-        if (intID % 2 != 0) {
-            duckQuack(runner, "${duck1}", repetitionCount, soundCount);
-        } else {
-            createDuck(runner, color, height, material, sound, wingsState);
-            runner.$(http().client(yellowDuckService)
-                    .receive()
-                    .response()
-                    .message()
-                    .extract(fromBody().expression("$.id", "duck2"))
-            );
-            duckQuack(runner, "${duck1}", repetitionCount, soundCount);
-        }
-        validateResponse(runner, "{\"sound\":\"" + quackMessage(repetitionCount, soundCount, sound) + "\"}", HttpStatus.OK);
+        parityQuack(runner, context, "duck1", repetitionCount, soundCount, duckling, 1);
+
+        DuckSound quacking = new DuckSound().sound(quackMessage(repetitionCount, soundCount, sound).toString());
+        validatePayloads(runner, quacking, HttpStatus.OK);
     }
 
     @Test(description = "Кряканье с существующим чётным идентификатором")
@@ -56,32 +51,23 @@ public class DuckQuackTest extends DuckActionClient {
         double height = 5.0;
         String material = "rubber";
         String sound = "quack";
-        String wingsState = "ACTIVE";
+        WingsState wingsState = ACTIVE;
         String repetitionCount = "2";
         String soundCount = "5";
 
-        createDuck(runner, color, height, material, sound, wingsState);
+        DuckCreate duckling = new DuckCreate().color(color).height(height).material(material).sound(sound).wingsState(wingsState);
+        createDuck(runner, duckling);
 
         runner.$(http().client(yellowDuckService)
                 .receive()
                 .response()
                 .message()
-                .extract(fromBody().expression("$.id", "duck1"))
-        );
-        int intID = Integer.parseInt(context.getVariable("duck1"));
-        if (intID % 2 == 0) {
-            duckQuack(runner, "${duck1}", repetitionCount, soundCount);
-        } else {
-            createDuck(runner, color, height, material, sound, wingsState);
-            runner.$(http().client(yellowDuckService)
-                    .receive()
-                    .response()
-                    .message()
-                    .extract(fromBody().expression("$.id", "duck2"))
-            );
-            duckQuack(runner, "${duck1}", repetitionCount, soundCount);
-        }
-        validateResponse(runner, "{\"sound\":\"" + quackMessage(repetitionCount, soundCount, sound) + "\"}", HttpStatus.OK);
+                .extract(fromBody().expression("$.id", "duck1")));
+        parityQuack(runner, context, "duck1", repetitionCount, soundCount, duckling, 0);
+
+        DuckSound quacking = new DuckSound().sound(quackMessage(repetitionCount, soundCount, sound).toString());
+        validatePayloads(runner, quacking, HttpStatus.OK);
     }
+
 
 }
