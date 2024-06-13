@@ -2,6 +2,7 @@ package autotest.payloads;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
@@ -9,10 +10,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DuckUpdate {
-    @JsonProperty
-    private int id;
-
+public class DuckBody {
     @JsonProperty
     private String color;
 
