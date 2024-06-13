@@ -1,0 +1,9 @@
+{
+  "id": "@greaterThan(0)@",
+  "color": "aquamarine",
+  "height": 16.0,
+  "material": "concrete",
+  "sound": "squeak",
+  "wingsState": "ACTIVE"
+
+}

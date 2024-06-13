@@ -10,6 +10,11 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
+tasks.withType(JavaApplication) {
+    options.encoding = 'UTF-8'
+}
+
+
 repositories {
     mavenCentral()
 }
@@ -27,6 +32,8 @@ dependencies {
     testCompileOnly group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
     testAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: '1.18.28'
 }
+
+
 
 test {
     useTestNG() {

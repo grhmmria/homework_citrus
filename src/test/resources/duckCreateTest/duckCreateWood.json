@@ -1,9 +1,9 @@
 {
-
-  "color": "yellow",
-  "height": 5.0,
+  "id": "@greaterThan(0)@",
+  "color": "purple",
+  "height": 11.0,
   "material": "wood",
-  "sound": "quack",
-  "wingsState": "ACTIVE"
+  "sound": "heehaw",
+  "wingsState": "UNDEFINED"
 
 }

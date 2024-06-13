@@ -1,7 +1,7 @@
 {
-
+  "id": "@greaterThan(0)@",
   "color": "yellow",
-  "height": 8.0,
+  "height": 5.0,
   "material": "rubber",
   "sound": "quack",
   "wingsState": "ACTIVE"

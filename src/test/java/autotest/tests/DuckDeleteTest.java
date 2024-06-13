@@ -1,7 +1,6 @@
 package autotest.tests;
 
 import autotest.clients.DuckActionClient;
-import autotest.payloads.DuckBody;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
@@ -12,8 +11,6 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
 import static autotest.payloads.WingsState.ACTIVE;
-import static com.consol.citrus.dsl.MessageSupport.MessageBodySupport.fromBody;
-import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 
 @Epic("Тесты duck-controller")
 @Feature("Эндпоинт /api/duck/delete")
@@ -27,6 +24,7 @@ public class DuckDeleteTest extends DuckActionClient {
         deleteDuck(runner, id);
 
         validateResources(runner, "duckDeleteTest/duckDeleteExisting.json", HttpStatus.OK);
+        validateDelete(runner, id);
 
     }
 
