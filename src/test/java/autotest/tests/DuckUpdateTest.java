@@ -28,8 +28,8 @@ public class DuckUpdateTest extends DuckActionClient {
 
         WingsState wingsState = ACTIVE;
 
-        String duckId = databaseCreate(runner, "yellow", 8.0, material, sound, wingsState);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+        String duckId = databaseCreateDuck(runner, "yellow", 8.0, material, sound, wingsState);
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
         duckUpdate(runner, "white", 5.0, duckId, material, sound, wingsState);
         DuckMessage message = new DuckMessage().message("Duck with id = " + duckId + " is updated");
@@ -48,8 +48,8 @@ public class DuckUpdateTest extends DuckActionClient {
 
         WingsState wingsState = ACTIVE;
 
-        String duckId = databaseCreate(runner, "yellow", height, material, "quack", wingsState);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+        String duckId = databaseCreateDuck(runner, "yellow", height, material, "quack", wingsState);
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
         duckUpdate(runner, "white", height, duckId, material, "quack!!!!!", wingsState);
         validateDatabase(runner, duckId, "white", height, material, "quack!!!!!", wingsState);

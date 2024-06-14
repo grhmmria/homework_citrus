@@ -29,7 +29,7 @@ public class DuckPropertiesTest extends DuckActionClient {
         WingsState wingsState = ACTIVE;
 
         String duckId = createParity(runner, color, height, material, sound, wingsState, 1);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
         duckProperties(runner, duckId);
 
@@ -47,7 +47,7 @@ public class DuckPropertiesTest extends DuckActionClient {
         WingsState wingsState = ACTIVE;
 
         String duckId = createParity(runner, color, height, material, sound, wingsState, 0);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
         duckProperties(runner, duckId);
 

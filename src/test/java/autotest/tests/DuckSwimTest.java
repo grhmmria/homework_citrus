@@ -24,8 +24,8 @@ public class DuckSwimTest extends DuckActionClient {
     @CitrusTest
     public void successfulSwim(@Optional @CitrusResource TestCaseRunner runner) {
 
-        String duckId = databaseCreate(runner, "yellow", 8.0, "rubber", "quack", ACTIVE);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+        String duckId = databaseCreateDuck(runner, "yellow", 8.0, "rubber", "quack", ACTIVE);
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
         duckSwim(runner, duckId);
 
@@ -36,7 +36,7 @@ public class DuckSwimTest extends DuckActionClient {
     @CitrusTest
     public void unsuccessfulSwim(@Optional @CitrusResource TestCaseRunner runner) {
 
-        String duckId = databaseCreate(runner, "yellow", 8.0, "rubber", "quack", ACTIVE);
+        String duckId = databaseCreateDuck(runner, "yellow", 8.0, "rubber", "quack", ACTIVE);
         deleteDuck(runner, duckId);
 
         duckSwim(runner, duckId);

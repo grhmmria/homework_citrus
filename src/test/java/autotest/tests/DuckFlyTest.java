@@ -21,8 +21,8 @@ public class DuckFlyTest extends DuckActionClient {
     @CitrusTest
     public void flyActive(@Optional @CitrusResource TestCaseRunner runner) {
 
-        String duckId = databaseCreate(runner, "yellow", 8.0, "rubber", "quack", ACTIVE);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+        String duckId = databaseCreateDuck(runner, "yellow", 8.0, "rubber", "quack", ACTIVE);
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
         duckFly(runner, duckId);
 
@@ -33,8 +33,8 @@ public class DuckFlyTest extends DuckActionClient {
     @CitrusTest
     public void flyFixed(@Optional @CitrusResource TestCaseRunner runner) {
 
-        String duckId = databaseCreate(runner, "yellow", 8.0, "rubber", "quack", FIXED);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+        String duckId = databaseCreateDuck(runner, "yellow", 8.0, "rubber", "quack", FIXED);
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
         duckFly(runner, duckId);
 
@@ -45,8 +45,8 @@ public class DuckFlyTest extends DuckActionClient {
     @CitrusTest
     public void flyUndefined(@Optional @CitrusResource TestCaseRunner runner) {
 
-        String duckId = databaseCreate(runner, "yellow", 8.0, "rubber", "quack", UNDEFINED);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+        String duckId = databaseCreateDuck(runner, "yellow", 8.0, "rubber", "quack", UNDEFINED);
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
         duckFly(runner, duckId);
 
