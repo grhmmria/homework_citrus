@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.test.context.ContextConfiguration;
+
+import static com.consol.citrus.actions.ExecuteSQLAction.Builder.sql;
 import static com.consol.citrus.actions.ExecuteSQLQueryAction.Builder.query;
 
 import static com.consol.citrus.dsl.MessageSupport.MessageBodySupport.fromBody;
@@ -57,6 +59,13 @@ public class BaseTest extends TestNGCitrusSpringSupport {
 
     }
 
+    @Step("Обновление базы с помощью запроса")
+    public void dataBaseUpdate(TestCaseRunner runner, String sql) {
+        runner.$(sql(testDatabase)
+                .statement(sql));
+    }
+
+
     @Step("Валидация ответа на запрос вводимой строкой")
     public void validateResponse(TestCaseRunner runner, String responseMessage, HttpStatus status) {
         runner.$(http().client(yellowDuckService)
@@ -86,10 +95,11 @@ public class BaseTest extends TestNGCitrusSpringSupport {
                 .body(new ClassPathResource(expectedPayload)));
     }
 
-    public void validateDelete(TestCaseRunner runner, String id) {
+    public void validateExist(TestCaseRunner runner, String id, String statement, int count) {
         runner.$(query(testDatabase)
-                .statement("SELECT COUNT(1) AS COUNT FROM DUCK WHERE ID=" + id)
-                .validate("COUNT", "0"));
+                .statement(statement + id)
+                .validate("COUNT", Integer.toString(count))
+        ) ;
 
     }
 

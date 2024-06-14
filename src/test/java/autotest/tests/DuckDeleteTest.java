@@ -20,7 +20,7 @@ public class DuckDeleteTest extends DuckActionClient {
     @CitrusTest
     public void deleteExisting(@Optional @CitrusResource TestCaseRunner runner) {
 
-        String id = databaseCreate(runner, "yellow", 5.0, "rubber", "quack", ACTIVE);
+        String id = databaseCreateDuck(runner, "yellow", 5.0, "rubber", "quack", ACTIVE);
         deleteDuck(runner, id);
 
         validateResources(runner, "duckDeleteTest/duckDeleteExisting.json", HttpStatus.OK);

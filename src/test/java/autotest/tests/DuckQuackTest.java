@@ -28,7 +28,7 @@ public class DuckQuackTest extends DuckActionClient {
         String soundCount = "5";
 
         String duckId = createParity(runner, "yellow", 5.0, "rubber", sound, ACTIVE, 1);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
         duckQuack(runner, duckId, repetitionCount, soundCount);
 
@@ -48,7 +48,7 @@ public class DuckQuackTest extends DuckActionClient {
 
 
         String duckId = createParity(runner, "yellow", 5.0, "rubber", sound, ACTIVE, 0);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
         duckQuack(runner, duckId, repetitionCount, soundCount);
 

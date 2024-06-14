@@ -45,7 +45,7 @@ public class DuckCreateTest extends DuckActionClient {
                 .extract(fromBody().expression("$.id", "duckId"))
         );
 
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
         validateDatabase(runner, "${duckId}", color, height, material, sound, wingsState);
     }
 
@@ -68,17 +68,17 @@ public class DuckCreateTest extends DuckActionClient {
                 .extract(fromBody().expression("$.id", "duckId"))
         );
 
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
+        runner.$(doFinally().actions(context -> dataBaseUpdate(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
         validateDatabase(runner, "${duckId}", color, height, material, sound, wingsState);
     }
 
     @Test(description = "Создание пяти уток параметризованным тестом", dataProvider = "ducklings")
 
     @CitrusTest
-    @CitrusParameters({"payload", "response", "runner", "status"})
-    public void createDucklings(Object payload, String response, @Optional @CitrusResource TestCaseRunner runner, HttpStatus status) {
+    @CitrusParameters({"payload", "response", "runner"})
+    public void createDucklings(Object payload, String response, @Optional @CitrusResource TestCaseRunner runner ) {
         createDuck(runner, payload);
-        validateResources(runner, response, status);
+        validateResources(runner, response, HttpStatus.OK);
 
     }
 
@@ -91,11 +91,11 @@ public class DuckCreateTest extends DuckActionClient {
     @DataProvider(name = "ducklings")
     public Object[][] DuckProvider() {
         return new Object[][]{
-                {albert, "duckCreateTest/duckCreateRubber.json", null, HttpStatus.OK},
-                {brown, "duckCreateTest/duckCreateSteel.json", null, HttpStatus.OK},
-                {columbus, "duckCreateTest/duckCreateWood.json", null, HttpStatus.OK},
-                {david, "duckCreateTest/duckCreateConcrete.json", null, HttpStatus.OK},
-                {evlampiy, "duckCreateTest/duckCreateCeramic.json", null, HttpStatus.OK}
+                {albert, "duckCreateTest/duckCreateRubber.json", null},
+                {brown, "duckCreateTest/duckCreateSteel.json", null},
+                {columbus, "duckCreateTest/duckCreateWood.json", null},
+                {david, "duckCreateTest/duckCreateConcrete.json", null},
+                {evlampiy, "duckCreateTest/duckCreateCeramic.json", null}
         };
 
     }

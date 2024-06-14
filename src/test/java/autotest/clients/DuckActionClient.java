@@ -1,40 +1,18 @@
 package autotest.clients;
 
 import autotest.BaseTest;
-import autotest.EndpointConfig;
 import autotest.payloads.WingsState;
 import com.consol.citrus.TestCaseRunner;
-import com.consol.citrus.message.MessageType;
-import com.consol.citrus.message.builder.ObjectMappingPayloadBuilder;
-import com.consol.citrus.testng.spring.TestNGCitrusSpringSupport;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.qameta.allure.Step;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-import org.springframework.test.context.ContextConfiguration;
-import com.consol.citrus.http.client.HttpClient;
 
 import java.util.Random;
 
-import static com.consol.citrus.actions.ExecuteSQLAction.Builder.sql;
-import static com.consol.citrus.actions.ExecuteSQLQueryAction.Builder.query;
-import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
-import static com.consol.citrus.dsl.MessageSupport.MessageBodySupport.fromBody;
-import static com.consol.citrus.http.actions.HttpActionBuilder.http;
-
 public class DuckActionClient extends BaseTest {
 
-    @Step("Обновление базы с помощью запроса")
-    public void databaseUpdate(TestCaseRunner runner, String sql) {
-        runner.$(sql(testDatabase)
-                .statement(sql));
-    }
+
 
     @Step("Создание уточки с помощью запроса к базе данных")
-    public String databaseCreate(TestCaseRunner runner, String color, double height, String material, String sound, WingsState wingsState) {
+    public String databaseCreateDuck(TestCaseRunner runner, String color, double height, String material, String sound, WingsState wingsState) {
         Random rd = new Random();
         int id;
         do {
@@ -42,7 +20,7 @@ public class DuckActionClient extends BaseTest {
         } while (id <= 0);
         runner.variable("duckId", id);
 
-        databaseUpdate(runner, "INSERT INTO DUCK (id, color, height, material, sound, wings_state) " +
+        dataBaseUpdate(runner, "INSERT INTO DUCK (id, color, height, material, sound, wings_state) " +
                 " VALUES (${duckId},'" + color + "'," + height + ",'" + material + "','" + sound + "','" + wingsState.toString() + "');");
         return Integer.toString(id);
     }
@@ -58,7 +36,7 @@ public class DuckActionClient extends BaseTest {
             id += 1;
         }
         runner.variable("duckId", Integer.toString(id));
-        databaseUpdate(runner, "INSERT INTO DUCK (id, color, height, material, sound, wings_state) " +
+        dataBaseUpdate(runner, "INSERT INTO DUCK (id, color, height, material, sound, wings_state) " +
                 " VALUES (${duckId},'" + color + "'," + height + ",'" + material + "','" + sound + "','" + wingsState.toString() + "');");
         return Integer.toString(id);
 
@@ -76,17 +54,17 @@ public class DuckActionClient extends BaseTest {
 
     @Step("Эндпоинт для команды \"Лететь\" уточки")
     public void duckFly(TestCaseRunner runner, String id) {
-        sendGet(runner, yellowDuckService, "api/duck/action/fly" + "?id=" + id);
+        sendGet(runner, yellowDuckService, "api/duck/action/fly?id=" + id);
     }
 
     @Step("Эндпоинт для команды \"Свойства\" уточки")
     public void duckProperties(TestCaseRunner runner, String id) {
-        sendGet(runner, yellowDuckService, "api/duck/action/properties" + "?id=" + id);
+        sendGet(runner, yellowDuckService, "api/duck/action/properties?id=" + id);
     }
 
     @Step("Эндпоинт для команды \"Крякать\" уточки")
     public void duckQuack(TestCaseRunner runner, String id, String repetitionCount, String soundCount) {
-        sendGet(runner, yellowDuckService, "api/duck/action/quack" + "?id=" + id + "&repetitionCount=" + repetitionCount + "&soundCount=" + soundCount);
+        sendGet(runner, yellowDuckService, "api/duck/action/quack?id=" + id + "&repetitionCount=" + repetitionCount + "&soundCount=" + soundCount);
     }
 
 
@@ -122,12 +100,15 @@ public class DuckActionClient extends BaseTest {
 
     @Step("Эндпоинт для команды \"Плыть\" уточки")
     public void duckSwim(TestCaseRunner runner, String id) {
-        sendGet(runner, yellowDuckService, "api/duck/action/swim" + "?id=" + id);
+        sendGet(runner, yellowDuckService, "api/duck/action/swim?id=" + id);
     }
 
     @Step("Эндпоинт для команды \"Обновить\" уточку")
     public void duckUpdate(TestCaseRunner runner, String color, double height, String id, String material, String sound, WingsState wingsState) {
-        sendPut(runner, yellowDuckService, "api/duck/update" + "?color=" + color + "&height=" + height + "&id=" + id + "&material=" + material + "&sound=" + sound + "&wings_state=" + wingsState);
+        sendPut(runner, yellowDuckService, "api/duck/update?color=" + color + "&height=" + height + "&id=" + id + "&material=" + material + "&sound=" + sound + "&wings_state=" + wingsState);
     }
+
+    public void validateDelete(TestCaseRunner runner, String id) {
+        validateExist(runner,id,"SELECT COUNT(1) AS COUNT FROM DUCK WHERE ID=",0); }
 
 }
