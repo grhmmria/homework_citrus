@@ -10,6 +10,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
 import static autotest.payloads.WingsState.ACTIVE;
+import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 
 import autotest.clients.DuckActionClient;
 
@@ -23,9 +24,10 @@ public class DuckSwimTest extends DuckActionClient {
     @CitrusTest
     public void successfulSwim(@Optional @CitrusResource TestCaseRunner runner) {
 
-        String id = databaseCreate(runner, "yellow", 8.0, "rubber", "quack", ACTIVE);
+        String duckId = databaseCreate(runner, "yellow", 8.0, "rubber", "quack", ACTIVE);
+        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
 
-        duckSwim(runner, id);
+        duckSwim(runner, duckId);
 
         validatePayloads(runner, "I'm swimming", HttpStatus.OK);
     }
@@ -34,10 +36,10 @@ public class DuckSwimTest extends DuckActionClient {
     @CitrusTest
     public void unsuccessfulSwim(@Optional @CitrusResource TestCaseRunner runner) {
 
-        String id = databaseCreate(runner, "yellow", 8.0, "rubber", "quack", ACTIVE);
-        deleteDuck(runner, id);
+        String duckId = databaseCreate(runner, "yellow", 8.0, "rubber", "quack", ACTIVE);
+        deleteDuck(runner, duckId);
 
-        duckSwim(runner, id);
+        duckSwim(runner, duckId);
         validateResources(runner, "duckSwimTest/duckSwimNotExisting.json", HttpStatus.NOT_FOUND);
     }
 

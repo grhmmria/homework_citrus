@@ -1,5 +1,6 @@
 package autotest.clients;
 
+import autotest.BaseTest;
 import autotest.EndpointConfig;
 import autotest.payloads.WingsState;
 import com.consol.citrus.TestCaseRunner;
@@ -24,113 +25,72 @@ import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 import static com.consol.citrus.dsl.MessageSupport.MessageBodySupport.fromBody;
 import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 
-@ContextConfiguration(classes = {EndpointConfig.class})
-public class DuckActionClient extends TestNGCitrusSpringSupport {
+public class DuckActionClient extends BaseTest {
 
-    @Autowired
-    protected HttpClient yellowDuckService;
-
-    @Autowired
-    protected SingleConnectionDataSource testDatabase;
-
+    @Step("РћР±РЅРѕРІР»РµРЅРёРµ Р±Р°Р·С‹ СЃ РїРѕРјРѕС‰СЊСЋ Р·Р°РїСЂРѕСЃР°")
     public void databaseUpdate(TestCaseRunner runner, String sql) {
         runner.$(sql(testDatabase)
                 .statement(sql));
     }
 
-    public String databaseCreate (TestCaseRunner runner, String color, double height, String material, String sound, WingsState wingsState) {
+    @Step("РЎРѕР·РґР°РЅРёРµ СѓС‚РѕС‡РєРё СЃ РїРѕРјРѕС‰СЊСЋ Р·Р°РїСЂРѕСЃР° Рє Р±Р°Р·Рµ РґР°РЅРЅС‹С…")
+    public String databaseCreate(TestCaseRunner runner, String color, double height, String material, String sound, WingsState wingsState) {
         Random rd = new Random();
         int id;
         do {
             id = rd.nextInt();
-        } while (id<=0);
+        } while (id <= 0);
         runner.variable("duckId", id);
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
 
         databaseUpdate(runner, "INSERT INTO DUCK (id, color, height, material, sound, wings_state) " +
-                " VALUES (${duckId},'"+color +"',"+height+",'"+material+"','"+sound+"','"+wingsState.toString()+"');");
-    return Integer.toString(id);
-    }
-
-    public String createOdd (TestCaseRunner runner, String color, double height, String material, String sound, WingsState wingsState) {
-        Random rd = new Random();
-        int id;
-        do {
-            id = rd.nextInt();
-        } while (id<=0);
-        if (id%2==0) {
-            id += 1;
-        }
-        runner.variable("duckId", Integer.toString(id));
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
-
-        databaseUpdate(runner, "INSERT INTO DUCK (id, color, height, material, sound, wings_state) " +
-                " VALUES (${duckId},'"+color +"',"+height+",'"+material+"','"+sound+"','"+wingsState.toString()+"');");
-     return Integer.toString(id);
-
-    }
-
-    public String createEven (TestCaseRunner runner, String color, double height, String material, String sound, WingsState wingsState) {
-        Random rd = new Random();
-        int id;
-        do {
-            id = rd.nextInt();
-        } while (id<=0);
-        if (id%2!=0) {
-            id += 1;
-        }
-        runner.variable("duckId", Integer.toString(id));
-        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
-
-        databaseUpdate(runner, "INSERT INTO DUCK (id, color, height, material, sound, wings_state) " +
-                " VALUES (${duckId},'"+color +"',"+height+",'"+material+"','"+sound+"','"+wingsState.toString()+"');");
+                " VALUES (${duckId},'" + color + "'," + height + ",'" + material + "','" + sound + "','" + wingsState.toString() + "');");
         return Integer.toString(id);
     }
 
-    @Step("Эндпоинт для внесения уточки в базу")
+    @Step("РЎРѕР·РґР°РЅРёРµ СѓС‚РѕС‡РєРё СЃ С‡С‘С‚РЅС‹Рј/РЅРµС‡С‘С‚РЅС‹Рј Р°Р№РґРё СЃ РїРѕРјРѕС‰СЊСЋ Р·Р°РїСЂРѕСЃР° Рє Р±Р°Р·Рµ РґР°РЅРЅС‹С…")
+    public String createParity(TestCaseRunner runner, String color, double height, String material, String sound, WingsState wingsState, int remainder) {
+        Random rd = new Random();
+        int id;
+        do {
+            id = rd.nextInt();
+        } while (id <= 0);
+        if (id % 2 != remainder) {
+            id += 1;
+        }
+        runner.variable("duckId", Integer.toString(id));
+        databaseUpdate(runner, "INSERT INTO DUCK (id, color, height, material, sound, wings_state) " +
+                " VALUES (${duckId},'" + color + "'," + height + ",'" + material + "','" + sound + "','" + wingsState.toString() + "');");
+        return Integer.toString(id);
+
+    }
+
+    @Step("Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ РІРЅРµСЃРµРЅРёСЏ СѓС‚РѕС‡РєРё РІ Р±Р°Р·Сѓ")
     public void createDuck(TestCaseRunner runner, Object body) {
-        runner.$(http().client(yellowDuckService)
-                .send()
-                .post("api/duck/create")
-                .message()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(new ObjectMappingPayloadBuilder(body, new ObjectMapper())));
+        sendPost(runner, yellowDuckService, body, "api/duck/create");
     }
 
-    @Step("Эндпоинт для удаления уточки из базы")
+    @Step("Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ СѓС‚РѕС‡РєРё РёР· Р±Р°Р·С‹")
     public void deleteDuck(TestCaseRunner runner, String id) {
-        runner.$(http().client(yellowDuckService)
-                .send()
-                .delete("api/duck/delete")
-                .message()
-                .queryParam("id", id));
+        sendDelete(runner, yellowDuckService, "api/duck/delete", "id", id);
     }
 
-    @Step("Эндпоинт для команды \"Лететь\" уточки")
-    public void duckFly(TestCaseRunner runner, String id) { //лететь
-        runner.$(http().client(yellowDuckService)
-                .send()
-                .get("api/duck/action/fly")
-                .queryParam("id", id));
+    @Step("Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ РєРѕРјР°РЅРґС‹ \"Р›РµС‚РµС‚СЊ\" СѓС‚РѕС‡РєРё")
+    public void duckFly(TestCaseRunner runner, String id) {
+        sendGet(runner, yellowDuckService, "api/duck/action/fly" + "?id=" + id);
     }
 
-    @Step("Эндпоинт для команды \"Свойства\" уточки")
-    public void duckProperties(TestCaseRunner runner, String id) { //свойства
-        runner.$(http().client(yellowDuckService)
-                .send()
-                .get("api/duck/action/properties")
-                .queryParam("id", id));
+    @Step("Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ РєРѕРјР°РЅРґС‹ \"РЎРІРѕР№СЃС‚РІР°\" СѓС‚РѕС‡РєРё")
+    public void duckProperties(TestCaseRunner runner, String id) {
+        sendGet(runner, yellowDuckService, "api/duck/action/properties" + "?id=" + id);
     }
-    @Step("Эндпоинт для команды \"Крякать\" уточки")
-    public void duckQuack(TestCaseRunner runner, String id, String repetitionCount, String soundCount) { //крякать
-        runner.$(http().client(yellowDuckService)
-                .send()
-                .get("api/duck/action/quack")
-                .queryParam("id", id)
-                .queryParam("repetitionCount", repetitionCount)
-                .queryParam("soundCount", soundCount));
+
+    @Step("Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ РєРѕРјР°РЅРґС‹ \"РљСЂСЏРєР°С‚СЊ\" СѓС‚РѕС‡РєРё")
+    public void duckQuack(TestCaseRunner runner, String id, String repetitionCount, String soundCount) {
+        sendGet(runner, yellowDuckService, "api/duck/action/quack" + "?id=" + id + "&repetitionCount=" + repetitionCount + "&soundCount=" + soundCount);
     }
-    @Step("Выведение последовательности звуков издаваемой уточкой")
+
+
+    @Step("Р’С‹РІРµРґРµРЅРёРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕСЃС‚Рё Р·РІСѓРєРѕРІ РёР·РґР°РІР°РµРјРѕР№ СѓС‚РѕС‡РєРѕР№")
     public static StringBuilder quackMessage(String repetitionCount, String soundCount, String sound) {
 
         StringBuilder message = new StringBuilder();
@@ -160,66 +120,14 @@ public class DuckActionClient extends TestNGCitrusSpringSupport {
         return message;
     }
 
-    @Step("Эндпоинт для команды \"Плыть\" уточки")
-    public void duckSwim(TestCaseRunner runner, String id) { //плыть
-        runner.$(http().client(yellowDuckService)
-                .send()
-                .get("api/duck/action/swim")
-                .queryParam("id", id));
+    @Step("Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ РєРѕРјР°РЅРґС‹ \"РџР»С‹С‚СЊ\" СѓС‚РѕС‡РєРё")
+    public void duckSwim(TestCaseRunner runner, String id) {
+        sendGet(runner, yellowDuckService, "api/duck/action/swim" + "?id=" + id);
     }
 
-    @Step("Эндпоинт для команды \"Обновить\" уточку")
+    @Step("Р­РЅРґРїРѕРёРЅС‚ РґР»СЏ РєРѕРјР°РЅРґС‹ \"РћР±РЅРѕРІРёС‚СЊ\" СѓС‚РѕС‡РєСѓ")
     public void duckUpdate(TestCaseRunner runner, String color, double height, String id, String material, String sound, WingsState wingsState) {
-        runner.$(http().client(yellowDuckService)
-                .send()
-                .put("api/duck/update")
-                .queryParam("color", color)
-                .queryParam("height", Double.toString(height))
-                .queryParam("id", id)
-                .queryParam("material", material)
-                .queryParam("sound", sound)
-                .queryParam("wingsState", wingsState.toString()));
-
+        sendPut(runner, yellowDuckService, "api/duck/update" + "?color=" + color + "&height=" + height + "&id=" + id + "&material=" + material + "&sound=" + sound + "&wings_state=" + wingsState);
     }
 
-    @Step("Валидация ответа на запрос вводимой строкой")
-    public void validateResponse(TestCaseRunner runner, String responseMessage, HttpStatus status) {
-        runner.$(http().client(yellowDuckService)
-                .receive()
-                .response(status)
-                .message()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .extract(fromBody().expression("$.id", "duckId"))
-                .body(responseMessage));
-    }
-
-    @Step("Валидация ответа на запрос с payloads")
-    public void validatePayloads(TestCaseRunner runner, Object body, HttpStatus status) {
-        runner.$(http().client(yellowDuckService)
-                .receive()
-                .response(status)
-                .message().type(MessageType.JSON)
-                .body(new ObjectMappingPayloadBuilder(body, new ObjectMapper())));
-    }
-
-    @Step("Валидация ответа на запрос с помощью json из папки properties")
-    public void validateResources(TestCaseRunner runner01, String expectedPayload, HttpStatus status) {
-        runner01.$(http().client(yellowDuckService)
-                .receive()
-                .response(status)
-                .message().type(MessageType.JSON)
-                .body(new ClassPathResource(expectedPayload)));
-    }
-
-
-    @Step("Валидация ответа на запрос проверкой базы")
-    public void validateDatabase(TestCaseRunner runner, String id, String color, double height, String material, String sound, WingsState wingsState) {
-        runner.$(query(testDatabase)
-                .statement("SELECT * FROM DUCK WHERE ID="+id)
-                .validate("COLOR",color)
-                .validate("HEIGHT",Double.toString(height))
-                .validate("MATERIAL",material)
-                .validate("SOUND",sound)
-                .validate("WINGS_STATE", wingsState.toString()));
-    }
 }

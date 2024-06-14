@@ -4,6 +4,7 @@ import com.consol.citrus.http.client.HttpClient;
 
 import com.consol.citrus.http.client.HttpClientBuilder;
 
+import com.consol.citrus.validation.json.JsonTextMessageValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
@@ -24,6 +25,5 @@ public class EndpointConfig {
 
     return dataSource;
 }
-
 
 }

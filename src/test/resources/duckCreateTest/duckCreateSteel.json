@@ -1,0 +1,9 @@
+{
+  "id": "@greaterThan(0)@",
+  "color": "white",
+  "height": 8.0,
+  "material": "steel",
+  "sound": "kryaak",
+  "wingsState": "FIXED"
+
+}

@@ -1,18 +1,24 @@
 package autotest.tests;
 
 import autotest.clients.DuckActionClient;
-import autotest.payloads.DuckBody;
+import autotest.payloads.DuckProperties;
 import autotest.payloads.WingsState;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
 import com.consol.citrus.annotations.CitrusTest;
+import com.consol.citrus.testng.CitrusParameters;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import org.springframework.http.HttpStatus;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
-import static autotest.payloads.WingsState.ACTIVE;
+import static autotest.payloads.WingsState.*;
+import static autotest.payloads.WingsState.FIXED;
+import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
+import static com.consol.citrus.dsl.MessageSupport.MessageBodySupport.fromBody;
+import static com.consol.citrus.http.actions.HttpActionBuilder.http;
 
 // здесь оставила инициализацию через строки так как вызывается ещё валидатор
 
@@ -30,10 +36,18 @@ public class DuckCreateTest extends DuckActionClient {
         String sound = "quack";
         WingsState wingsState = ACTIVE;
 
-        String id = databaseCreate(runner, color, height, material, sound, wingsState);
-        validateDatabase(runner, id, color, height, material, sound, wingsState);
-    }
+        DuckProperties duckling = new DuckProperties().color(color).height(height).material(material).sound(sound).wingsState(wingsState);
+        createDuck(runner, duckling);
+        runner.$(http().client(yellowDuckService)
+                .receive()
+                .response()
+                .message()
+                .extract(fromBody().expression("$.id", "duckId"))
+        );
 
+        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
+        validateDatabase(runner, "${duckId}", color, height, material, sound, wingsState);
+    }
 
     @Test(description = "Создание утки, wood")
     @CitrusTest
@@ -45,8 +59,45 @@ public class DuckCreateTest extends DuckActionClient {
         String sound = "quack";
         WingsState wingsState = ACTIVE;
 
-        String id = databaseCreate(runner, color, height, material, sound, wingsState);
-        validateDatabase(runner, id, color, height, material, sound, wingsState);
+        DuckProperties duckling = new DuckProperties().color(color).height(height).material(material).sound(sound).wingsState(wingsState);
+        createDuck(runner, duckling);
+        runner.$(http().client(yellowDuckService)
+                .receive()
+                .response()
+                .message()
+                .extract(fromBody().expression("$.id", "duckId"))
+        );
+
+        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID=${duckId}")));
+        validateDatabase(runner, "${duckId}", color, height, material, sound, wingsState);
+    }
+
+    @Test(description = "Создание пяти уток параметризованным тестом", dataProvider = "ducklings")
+
+    @CitrusTest
+    @CitrusParameters({"payload", "response", "runner", "status"})
+    public void createDucklings(Object payload, String response, @Optional @CitrusResource TestCaseRunner runner, HttpStatus status) {
+        createDuck(runner, payload);
+        validateResources(runner, response, status);
+
+    }
+
+    DuckProperties albert = new DuckProperties().color("yellow").height(5.0).material("rubber").sound("quack").wingsState(ACTIVE);
+    DuckProperties brown = new DuckProperties().color("white").height(8.0).material("steel").sound("kryaak").wingsState(FIXED);
+    DuckProperties columbus = new DuckProperties().color("purple").height(11.0).material("wood").sound("heehaw").wingsState(UNDEFINED);
+    DuckProperties david = new DuckProperties().color("aquamarine").height(16.0).material("concrete").sound("squeak").wingsState(ACTIVE);
+    DuckProperties evlampiy = new DuckProperties().color("baige").height(19.0).material("ceramic").sound("kukareeqqu").wingsState(FIXED);
+
+    @DataProvider(name = "ducklings")
+    public Object[][] DuckProvider() {
+        return new Object[][]{
+                {albert, "duckCreateTest/duckCreateRubber.json", null, HttpStatus.OK},
+                {brown, "duckCreateTest/duckCreateSteel.json", null, HttpStatus.OK},
+                {columbus, "duckCreateTest/duckCreateWood.json", null, HttpStatus.OK},
+                {david, "duckCreateTest/duckCreateConcrete.json", null, HttpStatus.OK},
+                {evlampiy, "duckCreateTest/duckCreateCeramic.json", null, HttpStatus.OK}
+        };
+
     }
 
 }

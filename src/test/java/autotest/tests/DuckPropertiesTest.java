@@ -1,7 +1,7 @@
 package autotest.tests;
 
 import autotest.clients.DuckActionClient;
-import autotest.payloads.DuckBody;
+import autotest.payloads.DuckProperties;
 import autotest.payloads.WingsState;
 import com.consol.citrus.TestCaseRunner;
 import com.consol.citrus.annotations.CitrusResource;
@@ -13,6 +13,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
 import static autotest.payloads.WingsState.ACTIVE;
+import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 
 @Epic("Тесты duck-action-controller")
 @Feature("Эндпоинт /api/duck/action/properties")
@@ -27,10 +28,12 @@ public class DuckPropertiesTest extends DuckActionClient {
         String sound = "quack";
         WingsState wingsState = ACTIVE;
 
-        String duckId = createOdd(runner, color, height, material, sound, wingsState);
+        String duckId = createParity(runner, color, height, material, sound, wingsState, 1);
+        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+
         duckProperties(runner, duckId);
 
-        DuckBody duckProps = new DuckBody().color(color).height(height).material(material).sound(sound).wingsState(wingsState);
+        DuckProperties duckProps = new DuckProperties().color(color).height(height).material(material).sound(sound).wingsState(wingsState);
         validatePayloads(runner, duckProps, HttpStatus.OK);
     }
 
@@ -43,10 +46,12 @@ public class DuckPropertiesTest extends DuckActionClient {
         String sound = "quack";
         WingsState wingsState = ACTIVE;
 
-        String duckId = createOdd(runner, color, height, material, sound, wingsState);
+        String duckId = createParity(runner, color, height, material, sound, wingsState, 0);
+        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+
         duckProperties(runner, duckId);
 
-        DuckBody duckProps = new DuckBody().color(color).height(height).material(material).sound(sound).wingsState(wingsState);
+        DuckProperties duckProps = new DuckProperties().color(color).height(height).material(material).sound(sound).wingsState(wingsState);
         validatePayloads(runner, duckProps, HttpStatus.OK);
     }
 

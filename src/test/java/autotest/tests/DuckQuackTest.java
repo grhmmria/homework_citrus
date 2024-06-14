@@ -12,6 +12,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Test;
 
 import static autotest.payloads.WingsState.ACTIVE;
+import static com.consol.citrus.container.FinallySequence.Builder.doFinally;
 
 @Epic("Тесты duck-action-controller")
 @Feature("Эндпоинт api/duck/action/quack")
@@ -26,7 +27,9 @@ public class DuckQuackTest extends DuckActionClient {
         String repetitionCount = "2";
         String soundCount = "5";
 
-        String duckId = createOdd(runner, "yellow", 5.0, "rubber", sound, ACTIVE);
+        String duckId = createParity(runner, "yellow", 5.0, "rubber", sound, ACTIVE, 1);
+        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+
         duckQuack(runner, duckId, repetitionCount, soundCount);
 
         DuckSound quacking = new DuckSound().sound(quackMessage(repetitionCount, soundCount, sound).toString());
@@ -44,7 +47,9 @@ public class DuckQuackTest extends DuckActionClient {
         String soundCount = "5";
 
 
-        String duckId = createEven(runner, "yellow", 5.0, "rubber", sound, ACTIVE);
+        String duckId = createParity(runner, "yellow", 5.0, "rubber", sound, ACTIVE, 0);
+        runner.$(doFinally().actions(context -> databaseUpdate(runner, "DELETE FROM DUCK WHERE ID="+duckId)));
+
         duckQuack(runner, duckId, repetitionCount, soundCount);
 
         DuckSound quacking = new DuckSound().sound(quackMessage(repetitionCount, soundCount, sound).toString());
